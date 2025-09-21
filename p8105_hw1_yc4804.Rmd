@@ -8,22 +8,40 @@ date: "2025-09-20"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Problem 1
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#load data packages
+library(moderndive)
+library(ggplot2)
+data("early_january_weather")
 
-```{r cars}
-summary(cars)
+
+```
+The dataset early_january_weather contains hourly weather observations at LaGuardia Airport in early January 2013. 
+The variable names are: `r paste(names(early_january_weather), collapse = ", ")`.
+Important variables for our analysis are time_hour, temp, and humid.
+The dataset has `r nrow(early_january_weather)` rows and `r ncol(early_january_weather)` columns.
+ The average air temperature is `r round(mean(early_january_weather$temp, na.rm = TRUE), 1)` °F.
+
+```{r}
+
+p_temp_time<-ggplot(
+  early_january_weather,
+  aes(x = time_hour, y = temp, color = humid)
+) +
+  geom_point(alpha = 0.6) +
+  labs(
+    x = "Time (Hourly)",
+    y = "Temperature (°F)",
+    color = "Humidity",
+    title = "NYC Early January Weather: Temperature vs Time"
+  ) 
+p_temp_time
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+Temperatures show clear diurnal cycles and a gradual warm-up into mid-January, peaking around Jan 13–14. Humidity (color scale) tends to be higher at higher temperatures—lighter points are concentrated during the warm spell—while darker (drier) points are more common during cooler periods and overnight. Overall, the figure suggests a modest positive temp–humidity relationship during this window, with day–night fluctuations superimposed on the warming trend.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
