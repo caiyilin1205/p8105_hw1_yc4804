@@ -1,5 +1,6 @@
 ---
 title: "p8105_hw1_yc4804"
+author: "Yilin Cai"
 output: html_document
 date: "2025-09-20"
 ---
@@ -26,7 +27,7 @@ The dataset has `r nrow(early_january_weather)` rows and `r ncol(early_january_w
  The average air temperature is `r round(mean(early_january_weather$temp, na.rm = TRUE), 1)` °F.
 
 ```{r}
-
+# Create a scatterplot of temperature vs time, colored by humidity
 p_temp_time<-ggplot(
   early_january_weather,
   aes(x = time_hour, y = temp, color = humid)
@@ -45,3 +46,55 @@ p_temp_time
 
 Temperatures show clear diurnal cycles and a gradual warm-up into mid-January, peaking around Jan 13–14. Humidity (color scale) tends to be higher at higher temperatures—lighter points are concentrated during the warm spell—while darker (drier) points are more common during cooler periods and overnight. Overall, the figure suggests a modest positive temp–humidity relationship during this window, with day–night fluctuations superimposed on the warming trend.
 
+```{r}
+# export the image to the project directory
+ggsave(filename = "temp_vs_time_scatter.png",  plot = p_temp_time, width = 7, height = 5, dpi = 300)
+```
+
+## Problem 2
+```{r}
+
+library(tidyverse)
+
+set.seed(123) # set seed for reproducibility
+
+#Create the data frame
+df_problem2 <- tibble(
+  norm_sample = rnorm(10), #numeric: standard normal sample
+  is_positive = norm_sample > 0, #logical: TRUE if > 0
+  char_vec = letters[1:10], #character: letter a-j
+  factor_vec = factor(rep(c("low", "med", "high"), length.out = 10)) #factor with 3 levels
+)
+
+df_problem2
+
+
+# Take the mean by pulling variables
+mean(df_problem2 %>% pull(norm_sample))   # works: numeric
+mean(df_problem2 %>% pull(is_positive))   # works: logical → 0/1
+mean(df_problem2 %>% pull(char_vec))      # error: characters can't be averaged
+mean(df_problem2 %>% pull(factor_vec))    # error: factors can't be averaged
+
+
+```
+Explanation:
+Works for norm_sample (numeric).
+Works for is_positive because logicals are coerced internally to 0/1.
+Fails for char_vec because text has no numeric meaning.
+Fails for factor_vec because factors are stored as integers but can’t be averaged directly without conversion.
+```{r}
+as.numeric(df_problem2 %>% pull(is_positive))
+as.numeric(df_problem2 %>% pull(char_vec))
+as.numeric(df_problem2 %>% pull(factor_vec))
+```
+
+Explanation: 
+
+Logical (is_positive):
+TRUE is coerced to 1 and FALSE to 0. Taking the mean works and gives the proportion of TRUE values.
+
+Character (char_vec):
+Characters cannot be mapped to numbers, so coercion gives NA for each element, along with a warning. This explains why you cannot take a mean of character vectors.
+
+Factor (factor_vec):
+Factors are stored internally as integers (codes for levels). as.numeric() reveals these codes, not the actual labels. A mean of these integers is possible, but it’s not meaningful because it just averages the underlying codes, not the factor levels themselves.

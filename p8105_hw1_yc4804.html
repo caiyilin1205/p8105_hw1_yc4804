@@ -9,6 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Yilin Cai" />
 
 <meta name="date" content="2025-09-20" />
 
@@ -350,6 +351,7 @@ display: none;
 
 
 <h1 class="title toc-ignore">p8105_hw1_yc4804</h1>
+<h4 class="author">Yilin Cai</h4>
 <h4 class="date">2025-09-20</h4>
 
 </div>
@@ -367,7 +369,8 @@ names are: origin, year, month, day, hour, temp, dewp, humid, wind_dir,
 wind_speed, wind_gust, precip, pressure, visib, time_hour. Important
 variables for our analysis are time_hour, temp, and humid. The dataset
 has 358 rows and 15 columns. The average air temperature is 39.6 °F.</p>
-<pre class="r"><code>p_temp_time&lt;-ggplot(
+<pre class="r"><code># Create a scatterplot of temperature vs time, colored by humidity
+p_temp_time&lt;-ggplot(
   early_january_weather,
   aes(x = time_hour, y = temp, color = humid)
 ) +
@@ -387,6 +390,81 @@ the warm spell—while darker (drier) points are more common during cooler
 periods and overnight. Overall, the figure suggests a modest positive
 temp–humidity relationship during this window, with day–night
 fluctuations superimposed on the warming trend.</p>
+<pre class="r"><code># export the image to the project directory
+ggsave(filename = &quot;temp_vs_time_scatter.png&quot;,  plot = p_temp_time, width = 7, height = 5, dpi = 300)</code></pre>
+</div>
+<div id="problem-2" class="section level2">
+<h2>Problem 2</h2>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ lubridate 1.9.4     ✔ tibble    3.3.0
+## ✔ purrr     1.1.0     ✔ tidyr     1.3.1
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>set.seed(123) # set seed for reproducibility
+
+#Create the data frame
+df_problem2 &lt;- tibble(
+  norm_sample = rnorm(10), #numeric: standard normal sample
+  is_positive = norm_sample &gt; 0, #logical: TRUE if &gt; 0
+  char_vec = letters[1:10], #character: letter a-j
+  factor_vec = factor(rep(c(&quot;low&quot;, &quot;med&quot;, &quot;high&quot;), length.out = 10)) #factor with 3 levels
+)
+
+df_problem2</code></pre>
+<pre><code>## # A tibble: 10 × 4
+##    norm_sample is_positive char_vec factor_vec
+##          &lt;dbl&gt; &lt;lgl&gt;       &lt;chr&gt;    &lt;fct&gt;     
+##  1     -0.560  FALSE       a        low       
+##  2     -0.230  FALSE       b        med       
+##  3      1.56   TRUE        c        high      
+##  4      0.0705 TRUE        d        low       
+##  5      0.129  TRUE        e        med       
+##  6      1.72   TRUE        f        high      
+##  7      0.461  TRUE        g        low       
+##  8     -1.27   FALSE       h        med       
+##  9     -0.687  FALSE       i        high      
+## 10     -0.446  FALSE       j        low</code></pre>
+<pre class="r"><code># Take the mean by pulling variables
+mean(df_problem2 %&gt;% pull(norm_sample))   # works: numeric</code></pre>
+<pre><code>## [1] 0.07462564</code></pre>
+<pre class="r"><code>mean(df_problem2 %&gt;% pull(is_positive))   # works: logical → 0/1</code></pre>
+<pre><code>## [1] 0.5</code></pre>
+<pre class="r"><code>mean(df_problem2 %&gt;% pull(char_vec))      # error: characters can&#39;t be averaged</code></pre>
+<pre><code>## Warning in mean.default(df_problem2 %&gt;% pull(char_vec)): argument is not
+## numeric or logical: returning NA</code></pre>
+<pre><code>## [1] NA</code></pre>
+<pre class="r"><code>mean(df_problem2 %&gt;% pull(factor_vec))    # error: factors can&#39;t be averaged</code></pre>
+<pre><code>## Warning in mean.default(df_problem2 %&gt;% pull(factor_vec)): argument is not
+## numeric or logical: returning NA</code></pre>
+<pre><code>## [1] NA</code></pre>
+<p>Explanation: Works for norm_sample (numeric). Works for is_positive
+because logicals are coerced internally to 0/1. Fails for char_vec
+because text has no numeric meaning. Fails for factor_vec because
+factors are stored as integers but can’t be averaged directly without
+conversion.</p>
+<pre class="r"><code>as.numeric(df_problem2 %&gt;% pull(is_positive))</code></pre>
+<pre><code>##  [1] 0 0 1 1 1 1 1 0 0 0</code></pre>
+<pre class="r"><code>as.numeric(df_problem2 %&gt;% pull(char_vec))</code></pre>
+<pre><code>## Warning: NAs introduced by coercion</code></pre>
+<pre><code>##  [1] NA NA NA NA NA NA NA NA NA NA</code></pre>
+<pre class="r"><code>as.numeric(df_problem2 %&gt;% pull(factor_vec))</code></pre>
+<pre><code>##  [1] 2 3 1 2 3 1 2 3 1 2</code></pre>
+<p>Explanation:</p>
+<p>Logical (is_positive): TRUE is coerced to 1 and FALSE to 0. Taking
+the mean works and gives the proportion of TRUE values.</p>
+<p>Character (char_vec): Characters cannot be mapped to numbers, so
+coercion gives NA for each element, along with a warning. This explains
+why you cannot take a mean of character vectors.</p>
+<p>Factor (factor_vec): Factors are stored internally as integers (codes
+for levels). as.numeric() reveals these codes, not the actual labels. A
+mean of these integers is possible, but it’s not meaningful because it
+just averages the underlying codes, not the factor levels
+themselves.</p>
 </div>
 
 
